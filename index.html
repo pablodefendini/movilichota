@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MoviliChota PR — Reporta vehículos en el carril de autobús</title>
+  <meta name="description" content="Reporta anónimamente vehículos que bloquean los carriles de autobús en Puerto Rico.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+  <!-- Ghost text decoration -->
+  <div class="ghost-text" aria-hidden="true">CHOTA</div>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <svg class="header-icon" width="36" height="36" viewBox="0 0 36 36" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="4" width="24" height="28" rx="4"/>
+          <circle cx="12" cy="26" r="2.5" fill="currentColor"/>
+          <circle cx="24" cy="26" r="2.5" fill="currentColor"/>
+          <line x1="6" y1="16" x2="30" y2="16"/>
+          <line x1="6" y1="10" x2="30" y2="10"/>
+          <rect x="10" y="4" width="4" height="6" rx="1" fill="currentColor" stroke="none" opacity="0.3"/>
+          <rect x="22" y="4" width="4" height="6" rx="1" fill="currentColor" stroke="none" opacity="0.3"/>
+        </svg>
+        <div>
+          <h1 class="site-title">MoviliChota <span class="title-accent">PR</span></h1>
+          <p class="site-tagline">Reporta vehículos en el carril de autobús</p>
+        </div>
+      </div>
+      <div class="header-stats" id="header-stats">
+        <span class="stat-label">Reportes</span>
+        <span class="stat-number" id="report-count">—</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- Report Form -->
+    <section class="report-section">
+      <div class="report-card">
+        <div class="report-card-header">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 9v4"/>
+            <path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 001.636 2.871h16.214a1.914 1.914 0 001.636-2.87L13.637 3.59a1.914 1.914 0 00-3.274 0z"/>
+            <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+          </svg>
+          <span class="form-heading">Nuevo Reporte</span>
+        </div>
+
+        <form id="report-form" autocomplete="off">
+          <div class="form-group">
+            <label for="infraction-type" class="form-label">Tipo de infracción</label>
+            <select id="infraction-type" required>
+              <option value="" disabled selected>Selecciona una infracción…</option>
+              <option value="estacionado">Vehículo estacionado en carril de autobús</option>
+              <option value="doble-fila">Van de entregas en doble fila en carril de autobús</option>
+              <option value="detenido">Vehículo detenido en carril de autobús (sin emergencia)</option>
+              <option value="parada-no-autorizada">Vehículo haciendo parada no autorizada</option>
+              <option value="bloqueando-parada">Vehículo bloqueando entrada/salida de parada</option>
+              <option value="taxi-rideshare">Taxi/rideshare recogiendo pasajeros en carril</option>
+              <option value="circulando">Vehículo circulando por carril exclusivo</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Foto de la infracción</label>
+            <div class="upload-area" id="upload-area">
+              <input type="file" id="photo-input" accept="image/*" capture="environment" hidden>
+              <div class="upload-placeholder" id="upload-placeholder">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2"/>
+                  <circle cx="8.5" cy="8.5" r="1.5"/>
+                  <path d="M21 15l-5-5L5 21"/>
+                </svg>
+                <span>Toca para subir foto o tomar una</span>
+              </div>
+              <img id="photo-preview" class="photo-preview" alt="Vista previa">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description" class="form-label">Descripción <span class="optional">(opcional)</span></label>
+            <textarea id="description" rows="2" placeholder="¿Algo más que quieras añadir?"></textarea>
+          </div>
+
+          <button type="submit" class="btn-submit" id="btn-submit">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 2L11 13"/>
+              <path d="M22 2l-7 20-4-9-9-4z"/>
+            </svg>
+            Reportar
+          </button>
+          <p class="form-note">100% anónimo. No recopilamos datos personales.</p>
+        </form>
+
+        <div class="submit-status" id="submit-status" hidden></div>
+      </div>
+    </section>
+
+    <!-- Feed -->
+    <section class="feed-section">
+      <div class="feed-header">
+        <span class="feed-label">Reportes recientes</span>
+        <div class="feed-line"></div>
+      </div>
+      <div id="feed" class="feed"></div>
+      <button class="btn-load-more" id="btn-load-more" hidden>Cargar más</button>
+      <div class="feed-empty" id="feed-empty" hidden>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" opacity="0.4">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M8 15h8"/>
+          <circle cx="9" cy="9" r="1" fill="currentColor"/>
+          <circle cx="15" cy="9" r="1" fill="currentColor"/>
+        </svg>
+        <p>No hay reportes todavía. ¡Sé el primero!</p>
+      </div>
+      <div class="feed-loading" id="feed-loading">
+        <div class="spinner"></div>
+        <span>Cargando reportes…</span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>MoviliChota PR — Un proyecto comunitario para Puerto Rico</p>
+    <p class="footer-sub">Los reportes son anónimos. Las fotos son públicas.</p>
+  </footer>
+
+</body>
+</html>
