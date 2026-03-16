@@ -19,7 +19,7 @@ const INFRACTION_LABELS = {
 };
 
 // --- State ---
-let supabase = null;
+let sbClient = null;
 let currentPage = 0;
 let allLoaded = false;
 let selectedFile = null;
@@ -41,18 +41,29 @@ const btnLoadMore = document.getElementById('btn-load-more');
 const reportCount = document.getElementById('report-count');
 
 // --- Init ---
-document.addEventListener('DOMContentLoaded', () => {
-  if (typeof SUPABASE_URL === 'undefined' || SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+window.init = function() {
+  if (!window.SUPABASE_URL || window.SUPABASE_URL === 'YOUR_SUPABASE_URL') {
     showDemoMode();
     return;
   }
 
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (!window.supabase?.createClient) {
+    setTimeout(window.init, 100);
+    return;
+  }
+
+  sbClient = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
   setupForm();
   loadFeed();
   setupRealtime();
   loadCount();
-});
+};
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', window.init);
+} else {
+  window.init();
+}
 
 // --- Demo Mode (no Supabase configured) ---
 function showDemoMode() {
@@ -77,9 +88,6 @@ function saveDemoReport(report) {
 
 // --- Form Setup ---
 function setupForm() {
-  // Photo upload click
-  uploadArea.addEventListener('click', () => photoInput.click());
-
   // Drag & drop
   uploadArea.addEventListener('dragover', (e) => {
     e.preventDefault();
@@ -130,17 +138,17 @@ async function handleSubmit(e) {
     let imageUrl = null;
 
     if (selectedFile) {
-      if (supabase) {
+      if (sbClient) {
         // Upload to Supabase Storage
         const ext = selectedFile.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await sbClient.storage
           .from(STORAGE_BUCKET)
           .upload(fileName, selectedFile, { contentType: selectedFile.type });
 
         if (uploadError) throw uploadError;
 
-        const { data: urlData } = supabase.storage
+        const { data: urlData } = sbClient.storage
           .from(STORAGE_BUCKET)
           .getPublicUrl(fileName);
         imageUrl = urlData.publicUrl;
@@ -157,8 +165,8 @@ async function handleSubmit(e) {
       created_at: new Date().toISOString(),
     };
 
-    if (supabase) {
-      const { error } = await supabase.from('reports').insert([report]);
+    if (sbClient) {
+      const { error } = await sbClient.from('reports').insert([report]);
       if (error) throw error;
     } else {
       // Demo mode
@@ -200,9 +208,9 @@ function showStatus(type, msg) {
 
 // --- Feed Loading ---
 async function loadFeed() {
-  if (!supabase) return;
+  if (!sbClient) return;
 
-  const { data, error } = await supabase
+  const { data, error } = await sbClient
     .from('reports')
     .select('*')
     .order('created_at', { ascending: false })
@@ -234,8 +242,8 @@ async function loadFeed() {
 }
 
 async function loadCount() {
-  if (!supabase) return;
-  const { count, error } = await supabase
+  if (!sbClient) return;
+  const { count, error } = await sbClient
     .from('reports')
     .select('*', { count: 'exact', head: true });
 
@@ -246,9 +254,9 @@ async function loadCount() {
 
 // --- Realtime ---
 function setupRealtime() {
-  if (!supabase) return;
+  if (!sbClient) return;
 
-  supabase
+  sbClient
     .channel('reports-feed')
     .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'reports' }, (payload) => {
       prependCard(payload.new);
