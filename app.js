@@ -3,10 +3,7 @@
 // Supabase-backed anonymous bus lane violation reporter
 // ============================================================
 
-// --- Configuration ---
-// Replace these with your Supabase project values
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+// --- Configuration (loaded from config.js) ---
 const STORAGE_BUCKET = 'report-images';
 const PAGE_SIZE = 20;
 
@@ -45,7 +42,7 @@ const reportCount = document.getElementById('report-count');
 
 // --- Init ---
 document.addEventListener('DOMContentLoaded', () => {
-  if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
+  if (typeof SUPABASE_URL === 'undefined' || SUPABASE_URL === 'YOUR_SUPABASE_URL') {
     showDemoMode();
     return;
   }
