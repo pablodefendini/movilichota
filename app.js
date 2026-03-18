@@ -295,7 +295,7 @@ function createCard(report, isNew) {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
         </svg>
-        ${timeAgo(report.created_at)}
+        ${timeAgo(report.created_at)} · ${formatTime(report.created_at)}
       </div>
     </div>`;
 
@@ -332,6 +332,20 @@ function timeAgo(dateStr) {
     return `hace ${d} ${d === 1 ? 'día' : 'días'}`;
   }
   return new Date(dateStr).toLocaleDateString('es-PR', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function formatTime(dateStr) {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+  const sameYear = date.getFullYear() === now.getFullYear();
+  const time = date.toLocaleTimeString('es-PR', { hour: 'numeric', minute: '2-digit' });
+
+  if (sameDay) return time;
+  const day = date.getDate();
+  const month = date.toLocaleString('es-PR', { month: 'short' });
+  if (sameYear) return `${day} ${month}, ${time}`;
+  return `${day} ${month} ${date.getFullYear()}, ${time}`;
 }
 
 function escapeHtml(str) {
