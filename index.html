@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MoviliChota PR — Reporta vehículos en el carril de autobús</title>
-  <meta name="description" content="Reporta anónimamente vehículos que bloquean los carriles de autobús en Puerto Rico.">
+  <title>Papelones en Tránsito — Por un Puerto Rico peatonal</title>
+  <meta name="description" content="Reporta anónimamente infracciones de tránsito en Puerto Rico. Por un Puerto Rico peatonal.">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="config.js" defer></script>
@@ -13,7 +13,7 @@
 <body>
 
   <!-- Ghost text decoration -->
-  <div class="ghost-text" aria-hidden="true">CHOTA</div>
+  <div class="ghost-text" aria-hidden="true">PAPELÓN</div>
 
   <header class="site-header">
     <div class="header-inner">
@@ -28,8 +28,8 @@
           <rect x="22" y="4" width="4" height="6" rx="1" fill="currentColor" stroke="none" opacity="0.3"/>
         </svg>
         <div>
-          <h1 class="site-title">MoviliChota <span class="title-accent">PR</span></h1>
-          <p class="site-tagline">Reporta vehículos en el carril de autobús</p>
+          <h1 class="site-title">Papelones <span class="title-accent">en Tránsito</span></h1>
+          <p class="site-tagline">Por un Puerto Rico peatonal</p>
         </div>
       </div>
       <div class="header-stats" id="header-stats">
@@ -65,6 +65,7 @@
               <option value="bloqueando-parada">Vehículo bloqueando entrada/salida de parada</option>
               <option value="taxi-rideshare">Taxi/rideshare recogiendo pasajeros en carril</option>
               <option value="circulando">Vehículo circulando por carril exclusivo</option>
+              <option value="acera">Vehículo estacionado en la acera</option>
             </select>
           </div>
 
@@ -128,7 +129,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>MoviliChota PR — Un proyecto comunitario para Puerto Rico</p>
+    <p>Papelones en Tránsito — Un proyecto comunitario para Puerto Rico</p>
     <p class="footer-sub">Los reportes son anónimos. Las fotos son públicas.</p>
   </footer>
 

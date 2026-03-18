@@ -1,6 +1,6 @@
 // ============================================================
-// MoviliChota PR — App Logic
-// Supabase-backed anonymous bus lane violation reporter
+// Papelones en Tránsito — App Logic
+// Supabase-backed anonymous traffic violation reporter
 // ============================================================
 
 // --- Configuration (loaded from config.js) ---
@@ -16,6 +16,7 @@ const INFRACTION_LABELS = {
   'bloqueando-parada': 'Bloqueando parada',
   'taxi-rideshare': 'Taxi/rideshare en carril',
   'circulando': 'Circulando por carril exclusivo',
+  'acera': 'Estacionado en acera',
 };
 
 // --- State ---
